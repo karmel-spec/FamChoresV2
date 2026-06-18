@@ -4,6 +4,8 @@ A daily-rotating family chore app (Concept D — "Command Center" design). Built
 (App Router) and SQLite. Chores rotate among children each day, balanced by time budget and
 difficulty, with a parent admin backend and per-child dashboards.
 
+Deployed on Railway as an always-on Node server with a persistent volume (see deploy steps below).
+
 ## Run it
 
 ```bash
