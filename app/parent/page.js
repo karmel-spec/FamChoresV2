@@ -114,7 +114,7 @@ export default function ParentOverview() {
                       <span className="pill" style={{ background: '#E1F5EE', color: '#0F6E56' }}>
                         done
                       </span>
-                    ) : fine.pastNoon ? (
+                    ) : fine.pastDeadline ? (
                       <span className="pill" style={{ background: '#FCEBEB', color: '#791F1F' }}>
                         {fine.incomplete} missed
                       </span>

@@ -6,10 +6,10 @@ import {
   dayStatsForChild,
   fineForChild,
   assignmentsForChild,
-  isPastNoon,
 } from '@/lib/chores';
 import { toggleAssignment } from '@/lib/actions';
 import { Avatar, DifficultyPill, Shell } from '@/components/ui';
+import Countdown from '@/components/Countdown';
 import getDb from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -109,35 +109,25 @@ export default function ChildDashboard({ params }) {
   const allDone = stats.total > 0 && stats.done === stats.total;
   const pct = stats.totalMin ? Math.round((stats.doneMin / stats.totalMin) * 100) : 0;
 
-  // status chip + "due in"
-  const now = new Date();
+  // status chip + countdown deadline (noon tomorrow)
+  const deadlineMs = fine.deadline.getTime();
+  const deadlineLabel = fine.deadline.toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
   let chip;
   if (allDone) {
     chip = { bg: '#E1F5EE', fg: '#0F6E56', icon: 'ti-circle-check', text: 'All done' };
-  } else if (fine.pastNoon) {
+  } else if (fine.pastDeadline) {
     chip = {
       bg: '#FCEBEB',
       fg: '#791F1F',
       icon: 'ti-alert-triangle',
-      text: `Past noon · $${fine.amount.toFixed(2)} fine`,
+      text: `Past due · $${fine.amount.toFixed(2)} fine`,
     };
   } else {
     chip = { bg: '#E6F1FB', fg: '#0C447C', icon: 'ti-clock', text: 'On track' };
-  }
-
-  let dueValue = '—';
-  let dueColor = 'var(--text)';
-  if (!isPastNoon(now)) {
-    const noon = new Date(now);
-    noon.setHours(12, 0, 0, 0);
-    const mins = Math.max(0, Math.round((noon - now) / 60000));
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    dueValue = h > 0 ? `${h}h ${m}m` : `${m}m`;
-    if (mins < 60) dueColor = '#BA7517';
-  } else {
-    dueValue = 'past';
-    dueColor = '#A32D2D';
   }
 
   return (
@@ -174,8 +164,17 @@ export default function ChildDashboard({ params }) {
       >
         <StatTile label="Completed" value={`${stats.done} / ${stats.total}`} />
         <StatTile label="Time left" value={stats.remainingMin} unit="min" />
-        <StatTile label="Due in" value={dueValue} color={dueColor} />
+        <StatTile
+          label="Due in"
+          value={allDone ? 'Done' : <Countdown deadlineMs={deadlineMs} />}
+          color={allDone ? '#0F6E56' : 'var(--text)'}
+        />
       </div>
+
+      <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--muted)' }}>
+        <i className="ti ti-calendar-clock" style={{ verticalAlign: '-2px', marginRight: 4 }} />
+        Due by <strong>{deadlineLabel} at noon</strong>
+      </p>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
         <div
@@ -227,8 +226,8 @@ export default function ChildDashboard({ params }) {
           }}
         >
           <i className="ti ti-alarm" style={{ fontSize: 20, color: '#854F0B' }} />
-          Finish everything by <strong>noon</strong> to avoid a fine
-          {fine.rate ? <> of ${fine.rate.toFixed(2)} per unfinished chore</> : null}.
+          Finish everything by <strong>{deadlineLabel} at noon</strong> to avoid a
+          {fine.rate ? <> one-time ${fine.rate.toFixed(2)}</> : null} fine.
         </div>
       ) : null}
     </Shell>

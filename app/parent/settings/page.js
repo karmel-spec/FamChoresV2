@@ -20,13 +20,13 @@ export default function SettingsPage() {
           <i className="ti ti-coin" /> Fine rate
         </h2>
         <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 14px' }}>
-          Charged per unfinished chore once the noon deadline passes. Set a per-child override on the
-          Children tab.
+          A single flat fine per day, charged once if any chore is still unfinished by the deadline
+          (noon the next day) — not per chore. Set a per-child override on the Children tab.
         </p>
         <form action={setGlobalFineRate} style={{ display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
           <label style={{ display: 'block' }}>
             <span className="label" style={{ display: 'block', marginBottom: 5 }}>
-              Default fine per missed chore ($)
+              Default fine per day ($)
             </span>
             <input
               className="input"
