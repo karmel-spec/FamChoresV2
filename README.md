@@ -56,7 +56,27 @@ After noon, an incomplete chore counts toward a fine: `incomplete chores × fine
 (per-child override, else the global default). Shown on each child's dashboard and totaled on the
 parent overview.
 
+## Deploying to Railway (with persistent data)
+
+The app runs as a normal Node server, so it keeps full functionality (SQLite, photo uploads,
+noon scheduler). To make data survive redeploys, give it a persistent volume:
+
+1. **New Project → Deploy from GitHub repo** → pick `karmel-spec/FamChoresV2`. Railway
+   auto-detects Next.js (`npm run build` / `npm start`).
+2. In the service, add a **Volume** and set its **mount path** to `/data`.
+3. In **Variables**, add `DATA_DIR=/data`.
+4. Deploy. Every push to `main` auto-deploys; the database and uploaded photos live on the
+   volume and persist across deploys.
+
+`DATA_DIR` controls where everything is stored — see `.env.example`.
+
+### Daily noon rotation in production
+
+The in-process scheduler runs on the always-on server. As a belt-and-suspenders option you can
+also add a Railway **Cron** that hits `GET /api/cron` at noon.
+
 ## Notes
 
-- Data lives in `data/chores.db` (SQLite). Delete it to reset to the seed.
-- Uploaded photos are stored in `public/uploads/`.
+- Data lives in `${DATA_DIR}/chores.db` (SQLite, defaults to `./data` locally). Delete it to
+  reset to the seed.
+- Uploaded photos are stored in `${DATA_DIR}/uploads/` and served via `/media/<file>`.
