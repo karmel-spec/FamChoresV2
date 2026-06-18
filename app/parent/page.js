@@ -5,7 +5,6 @@ import {
   todayStr,
   dayStatsForChild,
   fineForChild,
-  globalFineRate,
 } from '@/lib/chores';
 import { runRotationToday } from '@/lib/actions';
 import { Avatar, Shell, ParentNav } from '@/components/ui';
@@ -73,10 +72,6 @@ export default function ParentOverview() {
           <div style={{ fontSize: 22, fontWeight: 500, color: totalFines > 0 ? '#A32D2D' : 'var(--text)' }}>
             ${totalFines.toFixed(2)}
           </div>
-        </div>
-        <div className="stat">
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Default fine rate</div>
-          <div style={{ fontSize: 22, fontWeight: 500 }}>${globalFineRate().toFixed(2)}</div>
         </div>
       </div>
 

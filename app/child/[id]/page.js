@@ -10,6 +10,7 @@ import {
 import { toggleAssignment } from '@/lib/actions';
 import { Avatar, DifficultyPill, Shell } from '@/components/ui';
 import Countdown from '@/components/Countdown';
+import { quoteForDay } from '@/lib/quotes';
 import getDb from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -108,6 +109,7 @@ export default function ChildDashboard({ params }) {
 
   const allDone = stats.total > 0 && stats.done === stats.total;
   const pct = stats.totalMin ? Math.round((stats.doneMin / stats.totalMin) * 100) : 0;
+  const quote = quoteForDay(date, id);
 
   // status chip + countdown deadline (noon tomorrow)
   const deadlineMs = fine.deadline.getTime();
@@ -211,25 +213,22 @@ export default function ChildDashboard({ params }) {
         )}
       </Panel>
 
-      {!allDone ? (
-        <div
-          style={{
-            marginTop: 18,
-            background: '#FAEEDA',
-            borderRadius: 10,
-            padding: '12px 14px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            fontSize: 13,
-            color: '#633806',
-          }}
-        >
-          <i className="ti ti-alarm" style={{ fontSize: 20, color: '#854F0B' }} />
-          Finish everything by <strong>{deadlineLabel} at noon</strong> to avoid a
-          {fine.rate ? <> one-time ${fine.rate.toFixed(2)}</> : null} fine.
-        </div>
-      ) : null}
+      <div
+        style={{
+          marginTop: 18,
+          background: '#E1F5EE',
+          borderRadius: 10,
+          padding: '14px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          fontSize: 14,
+          color: '#0F6E56',
+        }}
+      >
+        <i className="ti ti-bulb" style={{ fontSize: 22, color: '#0F6E56', flexShrink: 0 }} />
+        <span style={{ fontStyle: 'italic' }}>{quote}</span>
+      </div>
     </Shell>
   );
 }
