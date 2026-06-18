@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { parentLogout } from '@/lib/actions';
 
 export function Avatar({ child, size = 46, rounded = 10 }) {
   const initials = (child?.name || '?')
@@ -90,7 +91,7 @@ export function ParentNav({ active }) {
     ['/parent/settings', 'Settings', 'ti-settings'],
   ];
   return (
-    <div style={{ display: 'flex', gap: 8, marginBottom: 22, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', gap: 8, marginBottom: 22, flexWrap: 'wrap', alignItems: 'center' }}>
       {tabs.map(([href, label, icon]) => (
         <Link
           key={href}
@@ -105,6 +106,11 @@ export function ParentNav({ active }) {
           <i className={`ti ${icon}`} /> {label}
         </Link>
       ))}
+      <form action={parentLogout} style={{ marginLeft: 'auto' }}>
+        <button className="btn" type="submit" style={{ fontSize: 13 }}>
+          <i className="ti ti-logout" /> Lock
+        </button>
+      </form>
     </div>
   );
 }

@@ -9,10 +9,12 @@ import {
 } from '@/lib/chores';
 import { runRotationToday } from '@/lib/actions';
 import { Avatar, Shell, ParentNav } from '@/components/ui';
+import { requireParent } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default function ParentOverview() {
+  requireParent();
   ensureToday();
   const date = todayStr();
   const children = listChildren();

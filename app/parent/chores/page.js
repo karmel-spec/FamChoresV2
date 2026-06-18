@@ -1,6 +1,7 @@
 import { listChildren } from '@/lib/chores';
 import { addChore, updateChore, deleteChore, toggleChoreActive } from '@/lib/actions';
 import { DifficultyPill, Shell, ParentNav } from '@/components/ui';
+import { requireParent } from '@/lib/auth';
 import getDb from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -16,6 +17,7 @@ function scheduleLabel(c) {
 }
 
 export default function ChoresPage() {
+  requireParent();
   const db = getDb();
   const children = listChildren();
   const chores = db.prepare('SELECT * FROM chores ORDER BY chore_type, category, sort, id').all();

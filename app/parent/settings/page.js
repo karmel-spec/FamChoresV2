@@ -1,12 +1,15 @@
 import { globalFineRate, listChildren } from '@/lib/chores';
-import { setGlobalFineRate } from '@/lib/actions';
+import { setGlobalFineRate, setParentPasscode } from '@/lib/actions';
 import { Shell, ParentNav, Avatar } from '@/components/ui';
+import { requireParent, getParentPasscode } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default function SettingsPage() {
+  requireParent();
   const rate = globalFineRate();
   const children = listChildren();
+  const passcode = getParentPasscode();
 
   return (
     <Shell title="Settings" subtitle="Fines and automation">
@@ -56,6 +59,41 @@ export default function SettingsPage() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="panel" style={{ padding: 18, marginBottom: 16 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 6px' }}>
+          <i className="ti ti-lock" /> Parent passcode
+        </h2>
+        <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 14px' }}>
+          Required to open the parent admin. Children’s dashboards stay open without it.
+          {passcode === '1234' ? (
+            <>
+              {' '}
+              <span style={{ color: '#A32D2D' }}>
+                You’re still using the default <strong>1234</strong> — change it now.
+              </span>
+            </>
+          ) : null}
+        </p>
+        <form action={setParentPasscode} style={{ display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
+          <label style={{ display: 'block' }}>
+            <span className="label" style={{ display: 'block', marginBottom: 5 }}>
+              New passcode (min 3 characters)
+            </span>
+            <input
+              className="input"
+              type="text"
+              name="passcode"
+              minLength={3}
+              placeholder="New passcode"
+              style={{ width: 200 }}
+            />
+          </label>
+          <button className="btn btn-primary" type="submit">
+            <i className="ti ti-device-floppy" /> Update passcode
+          </button>
+        </form>
       </div>
 
       <div className="panel" style={{ padding: 18 }}>

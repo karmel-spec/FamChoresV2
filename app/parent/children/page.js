@@ -1,10 +1,12 @@
 import { listChildren, globalFineRate } from '@/lib/chores';
 import { addChild, updateChild, deleteChild } from '@/lib/actions';
 import { Avatar, Shell, ParentNav } from '@/components/ui';
+import { requireParent } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default function ChildrenPage() {
+  requireParent();
   const children = listChildren();
   const gRate = globalFineRate();
 
