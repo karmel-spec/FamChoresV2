@@ -5,8 +5,9 @@ import {
   todayStr,
   dayStatsForChild,
   fineForChild,
+  unassignedForDate,
 } from '@/lib/chores';
-import { runRotationToday } from '@/lib/actions';
+import { runRotationToday, assignUnassignedChore } from '@/lib/actions';
 import { Avatar, Shell, ParentNav } from '@/components/ui';
 import { requireParent } from '@/lib/auth';
 
@@ -17,6 +18,7 @@ export default function ParentOverview() {
   ensureToday();
   const date = todayStr();
   const children = listChildren();
+  const unassigned = unassignedForDate(date);
 
   let totalFines = 0;
   let totalDone = 0;
@@ -141,9 +143,66 @@ export default function ParentOverview() {
         </table>
       </div>
 
+      {unassigned.length ? (
+        <div className="panel" style={{ overflow: 'hidden', marginTop: 18 }}>
+          <div
+            style={{
+              padding: '10px 14px',
+              background: '#FAEEDA',
+              borderBottom: '1px solid var(--border)',
+              fontSize: 12,
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              color: '#854F0B',
+            }}
+          >
+            <i className="ti ti-alert-triangle" style={{ marginRight: 6 }} />
+            Unassigned today · {unassigned.length} — didn’t fit anyone’s minute budget
+          </div>
+          {unassigned.map((u) => (
+            <div
+              key={u.chore_id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '11px 14px',
+                borderBottom: '1px solid var(--border)',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <span style={{ fontWeight: 500 }}>{u.title}</span>
+                <span style={{ fontSize: 12, color: 'var(--muted)', marginLeft: 8 }}>
+                  {u.minutes} min · {u.difficulty}
+                </span>
+              </div>
+              <form action={assignUnassignedChore} style={{ display: 'flex', gap: 8 }}>
+                <input type="hidden" name="chore_id" value={u.chore_id} />
+                <select className="select" name="child_id" style={{ width: 140 }} required defaultValue="">
+                  <option value="" disabled>
+                    Assign to…
+                  </option>
+                  {children.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <button className="btn" type="submit" style={{ padding: '6px 12px', fontSize: 13 }}>
+                  Assign
+                </button>
+              </form>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 16 }}>
         <i className="ti ti-clock" /> A fresh batch of chores is assigned automatically every day at
-        noon. Use “Run rotation now” to regenerate today’s batch immediately.
+        noon. Each child is filled only up to their daily minute budget; anything left over appears
+        above for you to hand out. Use “Run rotation now” to regenerate today’s batch.
       </p>
     </Shell>
   );
