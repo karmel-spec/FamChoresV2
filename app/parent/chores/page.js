@@ -48,6 +48,13 @@ export default function ChoresPage() {
     >
       <ParentNav active="/parent/chores" />
 
+      <div className="panel" style={{ padding: 16, marginBottom: 18 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 12px' }}>
+          <i className="ti ti-plus" /> Add a new chore
+        </h2>
+        <ChoreForm action={addChore} children={children} categories={categories} />
+      </div>
+
       <Section title="Priority chores · same every day" icon="ti-flag" count={priority.length}>
         {priority.map((c) => (
           <ChoreItem key={c.id} c={c} children={children} elig={elig[c.id]} categories={categories} />
@@ -80,13 +87,6 @@ export default function ChoresPage() {
         ))}
         {rotating.length === 0 ? <Empty>No rotating chores yet.</Empty> : null}
       </Section>
-
-      <div className="panel" style={{ padding: 16, marginTop: 18 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 12px' }}>
-          <i className="ti ti-plus" /> Add a new chore
-        </h2>
-        <ChoreForm action={addChore} children={children} categories={categories} />
-      </div>
     </Shell>
   );
 }
