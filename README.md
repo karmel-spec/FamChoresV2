@@ -25,20 +25,21 @@ The first run seeds the database (`data/chores.db`):
 ## What's built
 
 **Child dashboard** (`/child/[id]`)
-- Profile photo, stat tiles (completed, time left, time until noon), progress bar, status chip.
+- Profile photo, stat tiles (completed, rotating-chore minutes left, live countdown to the
+  deadline), progress bar, status chip.
 - **Priority tasks** (same every day) shown first, then **family contribution** (rotated today).
 - Tap the circle to mark a chore done. Each chore has an expandable "How to do it" with the
-  parent's training notes. Fine warning if not done by noon.
+  parent's training notes. A daily rotating note of encouragement shows at the bottom.
 
-**Parent admin** (`/parent`)
+**Parent admin** (`/parent`, passcode-protected)
 - **Overview** — per-child completion, minutes, status, and fines owed today; "Run rotation now".
 - **Children** — add/edit/remove kids, set color, **daily minute budget**, per-child fine
   override, and **upload a profile photo**.
 - **Chore list** — the master list. Add/edit/delete chores, toggle each **on/off** (keep it in
   the list without assigning it), set minutes, difficulty, daily/weekly + which day(s), who can
   be assigned (or force to one child), priority vs. rotating, and **training notes**.
-- **Settings** — default fine rate (charged per unfinished chore after noon) and a summary of
-  per-child overrides.
+- **Settings** — family **timezone**, **home page photo**, parent **passcode**, and the **fine
+  rate** (a single flat fine per day, with per-child overrides).
 
 ## How rotation works
 
@@ -52,11 +53,14 @@ The first run seeds the database (`data/chores.db`):
 - External scheduler hook: `GET /api/cron` (add `?force=1` to regenerate). Point a real cron job
   at it if you deploy.
 
-## Fines
+## Deadline & fines
 
-After noon, an incomplete chore counts toward a fine: `incomplete chores × fine rate`
-(per-child override, else the global default). Shown on each child's dashboard and totaled on the
-parent overview.
+- Each day's batch is due at **noon the next day** (a full noon-to-noon window). The child
+  dashboard shows a live countdown to it.
+- "Noon" is whatever the **family timezone** is set to in Parent admin → Settings (defaults to
+  Mountain). No server `TZ` env var required — though setting `TZ` still works if you prefer.
+- The fine is a **single flat amount per day** (the child's fine rate, or the global default),
+  charged once if any chore is unfinished by the deadline — not per chore.
 
 ## Deploying to Railway (with persistent data)
 
@@ -66,11 +70,12 @@ noon scheduler). To make data survive redeploys, give it a persistent volume:
 1. **New Project → Deploy from GitHub repo** → pick `karmel-spec/FamChoresV2`. Railway
    auto-detects Next.js (`npm run build` / `npm start`).
 2. In the service, add a **Volume** and set its **mount path** to `/data`.
-3. In **Variables**, add `DATA_DIR=/data`.
+3. In **Variables**, add `DATA_DIR=/data` and `AUTH_SECRET=<a long random string>`.
 4. Deploy. Every push to `main` auto-deploys; the database and uploaded photos live on the
    volume and persist across deploys.
 
-`DATA_DIR` controls where everything is stored — see `.env.example`.
+`DATA_DIR` controls where everything is stored — see `.env.example`. The timezone is set
+in-app (Settings), so no `TZ` variable is needed.
 
 ### Daily noon rotation in production
 

@@ -1,14 +1,31 @@
-import { globalFineRate, listChildren, getSetting } from '@/lib/chores';
+import { globalFineRate, listChildren, getSetting, getTimezone } from '@/lib/chores';
 import {
   setGlobalFineRate,
   setParentPasscode,
   setHomeHeaderPhoto,
   removeHomeHeaderPhoto,
+  setTimezone,
 } from '@/lib/actions';
 import { Shell, ParentNav, Avatar } from '@/components/ui';
 import { requireParent, getParentPasscode } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
+
+const TIMEZONES = [
+  ['America/New_York', 'Eastern (New York)'],
+  ['America/Chicago', 'Central (Chicago)'],
+  ['America/Denver', 'Mountain (Denver / Utah)'],
+  ['America/Phoenix', 'Arizona (no daylight saving)'],
+  ['America/Los_Angeles', 'Pacific (Los Angeles)'],
+  ['America/Anchorage', 'Alaska (Anchorage)'],
+  ['Pacific/Honolulu', 'Hawaii (Honolulu)'],
+  ['America/Toronto', 'Canada Eastern (Toronto)'],
+  ['America/Vancouver', 'Canada Pacific (Vancouver)'],
+  ['Europe/London', 'UK (London)'],
+  ['Europe/Paris', 'Central Europe (Paris)'],
+  ['Australia/Sydney', 'Australia Eastern (Sydney)'],
+  ['UTC', 'UTC'],
+];
 
 export default function SettingsPage() {
   requireParent();
@@ -16,10 +33,45 @@ export default function SettingsPage() {
   const children = listChildren();
   const passcode = getParentPasscode();
   const headerPhoto = getSetting('home_header_photo', '');
+  const timezone = getTimezone();
+  const localNow = new Date().toLocaleString(undefined, {
+    timeZone: timezone,
+    weekday: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  const tzOptions = TIMEZONES.some(([z]) => z === timezone)
+    ? TIMEZONES
+    : [[timezone, timezone], ...TIMEZONES];
 
   return (
     <Shell title="Settings" subtitle="Home photo, fines and automation">
       <ParentNav active="/parent/settings" />
+
+      <div className="panel" style={{ padding: 18, marginBottom: 16 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 6px' }}>
+          <i className="ti ti-clock" /> Timezone
+        </h2>
+        <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 14px' }}>
+          Sets when “noon” is for the daily rotation, the countdown, and the fine deadline.
+          Current local time: <strong>{localNow}</strong>.
+        </p>
+        <form action={setTimezone} style={{ display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
+          <label style={{ display: 'block' }}>
+            <span className="label" style={{ display: 'block', marginBottom: 5 }}>Family timezone</span>
+            <select className="select" name="timezone" defaultValue={timezone} style={{ width: 280 }}>
+              {tzOptions.map(([zone, label]) => (
+                <option key={zone} value={zone}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="btn btn-primary" type="submit">
+            <i className="ti ti-device-floppy" /> Save timezone
+          </button>
+        </form>
+      </div>
 
       <div className="panel" style={{ padding: 18, marginBottom: 16 }}>
         <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 6px' }}>
