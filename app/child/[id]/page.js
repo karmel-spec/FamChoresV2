@@ -110,6 +110,7 @@ export default function ChildDashboard({ params }) {
   const allDone = stats.total > 0 && stats.done === stats.total;
   const pct = stats.totalMin ? Math.round((stats.doneMin / stats.totalMin) * 100) : 0;
   const quote = quoteForDay(date, id);
+  const topQuote = quoteForDay(date, id + 100);
 
   // status chip + countdown deadline (noon tomorrow)
   const deadlineMs = fine.deadline.getTime();
@@ -149,11 +150,27 @@ export default function ChildDashboard({ params }) {
         </span>
       }
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-        <Avatar child={child} size={56} rounded={12} />
-        <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-          Budget: {child.minute_budget} min/day of family chores
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <Avatar child={child} size={56} rounded={12} />
+          <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+            Budget: {child.minute_budget} min/day of family chores
+          </div>
         </div>
+        <p
+          style={{
+            margin: '12px 0 0',
+            fontSize: 14,
+            fontStyle: 'italic',
+            color: '#185FA5',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 8,
+          }}
+        >
+          <i className="ti ti-quote" style={{ fontSize: 18, flexShrink: 0 }} aria-hidden="true" />
+          {topQuote}
+        </p>
       </div>
 
       <div
