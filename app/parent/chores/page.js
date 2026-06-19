@@ -32,23 +32,51 @@ export default function ChoresPage() {
   const priority = chores.filter((c) => c.chore_type === 'priority');
   const rotating = chores.filter((c) => c.chore_type === 'rotating');
 
+  // All category names, sorted, for the group headers and the form's picker.
+  const categories = [...new Set(chores.map((c) => c.category || 'General'))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+  // Group rotating chores by category.
+  const rotatingByCategory = categories
+    .map((cat) => ({ cat, items: rotating.filter((c) => (c.category || 'General') === cat) }))
+    .filter((g) => g.items.length > 0);
+
   return (
     <Shell
       title="Chore list"
-      subtitle="The master list — toggle on/off, edit, add training notes, or delete"
+      subtitle="The master list — organized by category. Toggle on/off, edit, add notes, or delete."
     >
       <ParentNav active="/parent/chores" />
 
       <Section title="Priority chores · same every day" icon="ti-flag" count={priority.length}>
         {priority.map((c) => (
-          <ChoreItem key={c.id} c={c} children={children} elig={elig[c.id]} />
+          <ChoreItem key={c.id} c={c} children={children} elig={elig[c.id]} categories={categories} />
         ))}
         {priority.length === 0 ? <Empty>No priority chores yet.</Empty> : null}
       </Section>
 
-      <Section title="Rotating chores · the family pool" icon="ti-refresh" count={rotating.length}>
-        {rotating.map((c) => (
-          <ChoreItem key={c.id} c={c} children={children} elig={elig[c.id]} />
+      <Section title="Rotating chores · by category" icon="ti-refresh" count={rotating.length}>
+        {rotatingByCategory.map((g) => (
+          <div key={g.cat}>
+            <div
+              style={{
+                padding: '8px 14px',
+                background: '#eef2f7',
+                borderBottom: '1px solid var(--border)',
+                fontSize: 12,
+                fontWeight: 500,
+                color: '#334155',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <i className="ti ti-folder" /> {g.cat} · {g.items.length}
+            </div>
+            {g.items.map((c) => (
+              <ChoreItem key={c.id} c={c} children={children} elig={elig[c.id]} categories={categories} />
+            ))}
+          </div>
         ))}
         {rotating.length === 0 ? <Empty>No rotating chores yet.</Empty> : null}
       </Section>
@@ -57,13 +85,13 @@ export default function ChoresPage() {
         <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 12px' }}>
           <i className="ti ti-plus" /> Add a new chore
         </h2>
-        <ChoreForm action={addChore} children={children} />
+        <ChoreForm action={addChore} children={children} categories={categories} />
       </div>
     </Shell>
   );
 }
 
-function ChoreItem({ c, children, elig }) {
+function ChoreItem({ c, children, elig, categories }) {
   const eligNames = children
     .filter((k) => (elig ? elig.has(k.id) : false))
     .map((k) => k.name);
@@ -109,7 +137,7 @@ function ChoreItem({ c, children, elig }) {
           <i className="ti ti-edit" /> Edit
         </summary>
         <div style={{ marginTop: 12 }}>
-          <ChoreForm action={updateChore} children={children} c={c} elig={elig} />
+          <ChoreForm action={updateChore} children={children} c={c} elig={elig} categories={categories} />
           <form action={deleteChore} style={{ marginTop: 10 }}>
             <input type="hidden" name="id" value={c.id} />
             <button className="btn btn-danger" type="submit" style={{ padding: '5px 10px', fontSize: 13 }}>
@@ -122,8 +150,9 @@ function ChoreItem({ c, children, elig }) {
   );
 }
 
-function ChoreForm({ action, children, c, elig }) {
+function ChoreForm({ action, children, c, elig, categories = [] }) {
   const mask = c ? (c.days_mask == null ? 127 : c.days_mask) : 127;
+  const listId = `cats-${c ? c.id : 'new'}`;
   return (
     <form action={action}>
       {c ? <input type="hidden" name="id" value={c.id} /> : null}
@@ -131,8 +160,20 @@ function ChoreForm({ action, children, c, elig }) {
         <Field label="Title">
           <input className="input" name="title" defaultValue={c?.title || ''} required />
         </Field>
-        <Field label="Category">
-          <input className="input" name="category" defaultValue={c?.category || 'General'} />
+        <Field label="Category (pick or type a new one)">
+          <input
+            className="input"
+            name="category"
+            list={listId}
+            defaultValue={c?.category || 'General'}
+            placeholder="e.g. Kitchen"
+            autoComplete="off"
+          />
+          <datalist id={listId}>
+            {categories.map((cat) => (
+              <option key={cat} value={cat} />
+            ))}
+          </datalist>
         </Field>
         <Field label="Minutes">
           <input className="input" type="number" name="minutes" defaultValue={c?.minutes ?? 10} min={1} />
