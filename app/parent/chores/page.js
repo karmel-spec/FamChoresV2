@@ -1,6 +1,7 @@
 import { listChildren } from '@/lib/chores';
 import { addChore, updateChore, deleteChore, toggleChoreActive } from '@/lib/actions';
 import { DifficultyPill, Shell, ParentNav } from '@/components/ui';
+import CategoryPicker from '@/components/CategoryPicker';
 import { requireParent } from '@/lib/auth';
 import getDb from '@/lib/db';
 
@@ -152,7 +153,6 @@ function ChoreItem({ c, children, elig, categories }) {
 
 function ChoreForm({ action, children, c, elig, categories = [] }) {
   const mask = c ? (c.days_mask == null ? 127 : c.days_mask) : 127;
-  const listId = `cats-${c ? c.id : 'new'}`;
   return (
     <form action={action}>
       {c ? <input type="hidden" name="id" value={c.id} /> : null}
@@ -160,20 +160,8 @@ function ChoreForm({ action, children, c, elig, categories = [] }) {
         <Field label="Title">
           <input className="input" name="title" defaultValue={c?.title || ''} required />
         </Field>
-        <Field label="Category (pick or type a new one)">
-          <input
-            className="input"
-            name="category"
-            list={listId}
-            defaultValue={c?.category || 'General'}
-            placeholder="e.g. Kitchen"
-            autoComplete="off"
-          />
-          <datalist id={listId}>
-            {categories.map((cat) => (
-              <option key={cat} value={cat} />
-            ))}
-          </datalist>
+        <Field label="Category">
+          <CategoryPicker categories={categories} defaultValue={c?.category || 'General'} />
         </Field>
         <Field label="Minutes">
           <input className="input" type="number" name="minutes" defaultValue={c?.minutes ?? 10} min={1} />
