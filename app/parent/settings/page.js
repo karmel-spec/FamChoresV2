@@ -1,10 +1,12 @@
 import { globalFineRate, listChildren, getSetting, getTimezone } from '@/lib/chores';
+import getDb from '@/lib/db';
 import {
   setGlobalFineRate,
   setParentPasscode,
   setHomeHeaderPhoto,
   removeHomeHeaderPhoto,
   setTimezone,
+  setSaturdayYard,
 } from '@/lib/actions';
 import { Shell, ParentNav, Avatar } from '@/components/ui';
 import { requireParent, getParentPasscode } from '@/lib/auth';
@@ -44,6 +46,13 @@ export default function SettingsPage() {
     ? TIMEZONES
     : [[timezone, timezone], ...TIMEZONES];
 
+  const satMinutes = parseInt(getSetting('saturday_extra_minutes', '60'), 10) || 0;
+  const satCategory = getSetting('saturday_extra_category', 'Outdoor');
+  const allCategories = getDb()
+    .prepare("SELECT DISTINCT category FROM chores WHERE chore_type = 'rotating' ORDER BY category")
+    .all()
+    .map((r) => r.category);
+
   return (
     <Shell title="Settings" subtitle="Home photo, fines and automation">
       <ParentNav active="/parent/settings" />
@@ -69,6 +78,50 @@ export default function SettingsPage() {
           </label>
           <button className="btn btn-primary" type="submit">
             <i className="ti ti-device-floppy" /> Save timezone
+          </button>
+        </form>
+      </div>
+
+      <div className="panel" style={{ padding: 18, marginBottom: 16 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 6px' }}>
+          <i className="ti ti-leaf" /> Saturday yard work
+        </h2>
+        <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 14px' }}>
+          On Saturdays each child gets these extra minutes of chores from one category, on top of
+          their normal daily budget. That category is reserved for this Saturday queue. Set minutes
+          to 0 to turn it off.
+        </p>
+        <form action={setSaturdayYard} style={{ display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
+          <label style={{ display: 'block' }}>
+            <span className="label" style={{ display: 'block', marginBottom: 5 }}>Extra minutes (Saturdays)</span>
+            <input
+              className="input"
+              type="number"
+              min="0"
+              step="5"
+              name="saturday_extra_minutes"
+              defaultValue={satMinutes}
+              style={{ width: 140 }}
+            />
+          </label>
+          <label style={{ display: 'block' }}>
+            <span className="label" style={{ display: 'block', marginBottom: 5 }}>From category</span>
+            <input
+              className="input"
+              name="saturday_extra_category"
+              list="sat-cats"
+              defaultValue={satCategory}
+              style={{ width: 200 }}
+              autoComplete="off"
+            />
+            <datalist id="sat-cats">
+              {allCategories.map((cat) => (
+                <option key={cat} value={cat} />
+              ))}
+            </datalist>
+          </label>
+          <button className="btn btn-primary" type="submit">
+            <i className="ti ti-device-floppy" /> Save
           </button>
         </form>
       </div>

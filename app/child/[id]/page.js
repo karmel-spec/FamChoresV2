@@ -106,6 +106,7 @@ export default function ChildDashboard({ params }) {
 
   const priority = rows.filter((r) => r.source === 'priority');
   const rotating = rows.filter((r) => r.source === 'rotating');
+  const yard = rows.filter((r) => r.source === 'yard');
 
   const allDone = stats.total > 0 && stats.done === stats.total;
   const pct = stats.totalMin ? Math.round((stats.doneMin / stats.totalMin) * 100) : 0;
@@ -229,6 +230,17 @@ export default function ChildDashboard({ params }) {
           <Empty>No rotating chores assigned today.</Empty>
         )}
       </Panel>
+
+      {yard.length ? (
+        <>
+          <div style={{ height: 14 }} />
+          <Panel title="Saturday yard work · extra" icon="ti-leaf">
+            {yard.map((a) => (
+              <ChoreRow key={a.id} a={a} notes={notesById[a.chore_id]} />
+            ))}
+          </Panel>
+        </>
+      ) : null}
 
       <div
         style={{
