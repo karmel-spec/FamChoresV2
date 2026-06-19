@@ -1,5 +1,10 @@
-import { globalFineRate, listChildren } from '@/lib/chores';
-import { setGlobalFineRate, setParentPasscode } from '@/lib/actions';
+import { globalFineRate, listChildren, getSetting } from '@/lib/chores';
+import {
+  setGlobalFineRate,
+  setParentPasscode,
+  setHomeHeaderPhoto,
+  removeHomeHeaderPhoto,
+} from '@/lib/actions';
 import { Shell, ParentNav, Avatar } from '@/components/ui';
 import { requireParent, getParentPasscode } from '@/lib/auth';
 
@@ -10,10 +15,63 @@ export default function SettingsPage() {
   const rate = globalFineRate();
   const children = listChildren();
   const passcode = getParentPasscode();
+  const headerPhoto = getSetting('home_header_photo', '');
 
   return (
-    <Shell title="Settings" subtitle="Fines and automation">
+    <Shell title="Settings" subtitle="Home photo, fines and automation">
       <ParentNav active="/parent/settings" />
+
+      <div className="panel" style={{ padding: 18, marginBottom: 16 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 6px' }}>
+          <i className="ti ti-photo" /> Home page photo
+        </h2>
+        <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 14px' }}>
+          A family photo (or any image) shown as the banner at the top of the home page.
+        </p>
+        {headerPhoto ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={headerPhoto}
+            alt="Current home banner"
+            style={{
+              width: '100%',
+              maxWidth: 420,
+              height: 150,
+              objectFit: 'cover',
+              borderRadius: 10,
+              display: 'block',
+              marginBottom: 12,
+            }}
+          />
+        ) : null}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
+          <form action={setHomeHeaderPhoto}>
+            <label style={{ display: 'block' }}>
+              <span className="label" style={{ display: 'block', marginBottom: 5 }}>
+                {headerPhoto ? 'Replace photo' : 'Upload photo'}
+              </span>
+              <input
+                className="input"
+                type="file"
+                name="photo"
+                accept="image/*"
+                required
+                style={{ padding: 6, width: 260 }}
+              />
+            </label>
+            <button className="btn btn-primary" type="submit" style={{ marginTop: 10 }}>
+              <i className="ti ti-upload" /> Save photo
+            </button>
+          </form>
+          {headerPhoto ? (
+            <form action={removeHomeHeaderPhoto}>
+              <button className="btn btn-danger" type="submit" style={{ fontSize: 13 }}>
+                <i className="ti ti-trash" /> Remove
+              </button>
+            </form>
+          ) : null}
+        </div>
+      </div>
 
       <div className="panel" style={{ padding: 18, marginBottom: 16 }}>
         <h2 style={{ fontSize: 16, fontWeight: 500, margin: '0 0 6px' }}>
